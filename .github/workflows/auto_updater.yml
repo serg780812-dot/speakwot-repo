@@ -7,8 +7,8 @@ name: SpeakWot Smart Artificial Auto-Updater Robot
 
 on:
   schedule:
-    - cron: '0 3 * * *' # Автоматический запуск каждую ночь в 03:00 по Гринвичу
-  workflow_dispatch: # Позволяет запустить робота вручную в любой момент одной кнопкой
+    - cron: '0 3 * * *'
+  workflow_dispatch:
 
 jobs:
   smart-update:
@@ -35,11 +35,9 @@ jobs:
           from bs4 import BeautifulSoup
 
           UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-          
-          # Запрос к стабильному зеркалу для определения патча и ссылки на сборку Andre_V
           target_url = "https://wotsite.net"
           
-          detected_patch = "2.4.1.1" # Дефолтная заглушка
+          detected_patch = "2.4.1.1"
           download_url = ""
 
           try:
@@ -48,7 +46,7 @@ jobs:
                   soup = BeautifulSoup(res.text, 'html.parser')
                   versions = re.findall(r'\b(?:1|2)\.\d{2}\.\d\.\d\b', soup.get_text())
                   if versions:
-                      detected_patch = versions
+                      detected_patch = versions[0]
                   
                   for a in soup.find_all('a', href=True):
                       href = a['href']
@@ -56,7 +54,7 @@ jobs:
                           download_url = href if href.startswith('http') else "https://wotsite.net" + href
                           break
           except Exception as e:
-              print(f"Ошибка парсинга: {e}")
+              print(f"Error parsing: {e}")
 
           if not download_url:
               download_url = f"https://wotsite.net_{detected_patch}.zip"
@@ -72,103 +70,82 @@ jobs:
       - name: Check Compatibility and Clean Up Old Patches
         run: |
           echo "=== Проверка совместимости и тотальная очистка старых папок ==="
-          TARGET_DIR="./downloads/mods/${{ env.CURRENT_PATCH }}"
-          
-          # Полностью удаляем старые файлы перед загрузкой новых, чтобы гитхаб не раздувался
+          TARGET_DIR="./downloads/mods/${CURRENT_PATCH}"
           if [ -d "./downloads" ]; then
-            echo "Удаление старых версий модов..."
             rm -rf ./downloads
           fi
-          
           mkdir -p "$TARGET_DIR"
           echo "TARGET_PATH=$TARGET_DIR" >> $GITHUB_ENV
 
       - name: Execute Multi-Server Smart Download Engine (Categories 1-3)
         run: |
-          echo "=== Скачивание базовых системных модов и библиотек под патч: ${{ env.CURRENT_PATCH }} ==="
-          CHAMPI_URL="https://champi.de{{ env.CURRENT_PATCH }}/"
-          PROTANKI_URL="https://protanki.tv{{ env.CURRENT_PATCH }}/"
+          echo "=== Скачивание базовых системных модов под патч: ${CURRENT_PATCH} ==="
+          CHAMPI_URL="https://champi.de{CURRENT_PATCH}/"
+          PROTANKI_URL="https://protanki.tv{|CURRENT_PATCH}/"
           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
-          # Базовые системные библиотеки
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/OpenModsCore.wotmod" "${CHAMPI_URL}OpenModsCore.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/izeberg.vehicle_exp.wotmod" "${CHAMPI_URL}izeberg.vehicle_exp.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/izeberg.repair.wotmod" "${CHAMPI_URL}izeberg.repair.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/izeberg.reload_timer.wotmod" "${CHAMPI_URL}izeberg.reload_timer.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/izeberg.spotted.wotmod" "${CHAMPI_URL}izeberg.spotted.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/armor.ScriptLoader.wotmod" "${CHAMPI_URL}armor.ScriptLoader.wotmod" || true
-
-          # Скрипты независимых разработчиков и ProTanki
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/pruszko.dispersion_reticle_3.1.4.wotmod" "${CHAMPI_URL}pruszko.dispersion_reticle_3.1.4.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/pruszko.achievement_notification_1.2.5.wotmod" "${CHAMPI_URL}pruszko.achievement_notification_1.2.5.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/tv.protanki.stuff_8.1.07.wotmod" "${PROTANKI_URL}tv.protanki.stuff_8.1.07.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/tv.protanki.spotted_8.0.04.wotmod" "${PROTANKI_URL}tv.protanki.spotted_8.0.04.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/OpenModsCore.wotmod" "${CHAMPI_URL}OpenModsCore.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/izeberg.vehicle_exp.wotmod" "${CHAMPI_URL}izeberg.vehicle_exp.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/izeberg.repair.wotmod" "${CHAMPI_URL}izeberg.repair.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/izeberg.reload_timer.wotmod" "${CHAMPI_URL}izeberg.reload_timer.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/izeberg.spotted.wotmod" "${CHAMPI_URL}izeberg.spotted.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/armor.ScriptLoader.wotmod" "${CHAMPI_URL}armor.ScriptLoader.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/pruszko.dispersion_reticle_3.1.4.wotmod" "${CHAMPI_URL}pruszko.dispersion_reticle_3.1.4.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/pruszko.achievement_notification_1.2.5.wotmod" "${CHAMPI_URL}pruszko.achievement_notification_1.2.5.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/tv.protanki.stuff_8.1.07.wotmod" "${PROTANKI_URL}tv.protanki.stuff_8.1.07.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/tv.protanki.spotted_8.0.04.wotmod" "${PROTANKI_URL}tv.protanki.spotted_8.0.04.wotmod" || true
 
       - name: Smart Unpack Engine - Andre_V Sound Pack (Category 4)
         run: |
-          echo "=== Загрузка и интеллектуальная распаковка тяжелого архива озвучек ==="
+          echo "=== Загрузка и распаковка архива озвучек ==="
           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-          
-          curl -L -A "$UA" -e "https://wotsite.net" --connect-timeout 60 --retry 3 -o "andre_v_temp.zip" "${{ env.ANDRE_URL }}"
+          curl -L -A "$UA" -e "https://wotsite.net" --connect-timeout 60 --retry 3 -o "andre_v_temp.zip" "${ANDRE_URL}"
 
           if [ -f "andre_v_temp.zip" ]; then
             mkdir -p ./temp_unpack
             unzip -q andre_v_temp.zip -d ./temp_unpack || 7z x andre_v_temp.zip -o./temp_unpack -y
-            
-            echo "Поиск и копирование всех запрошенных wotmod файлов озвучки..."
-            # Робот потрошит архив и находит абсолютно ВСЕ 29 озвучек, которые были у тебя в коде
-            find ./temp_unpack -name "*.wotmod" -exec cp {} "${{ env.TARGET_PATH }}/" \;
-            
-            # Тотальная очистка временного мусора
+            find ./temp_unpack -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
             rm -rf ./temp_unpack
             rm -f andre_v_temp.zip
-            echo "Все модификации озвучек от Andre_V успешно извлечены!"
+            echo "Все озвучки от Andre_V успешно извлечены!"
           else
-            echo "Критическая ошибка: Архивы озвучек Andre_V не были загружены."
+            echo "Ошибка: Архив озвучек не загружен."
           fi
 
       - name: Execute Cheat Download Engine - WotSpeak Core (Category 5)
         run: |
-          echo "=== Загрузка полного списка читов и запрещенных модов (Категория 5) ==="
-          # Перенаправляем загрузку чит-файлов на открытый и стабильный CDN
-          CHEAT_CDN="https://champi.de{{ env.CURRENT_PATCH }}/"
+          echo "=== Загрузка списка читов (Категория 5) ==="
+          CHEAT_CDN="https://champi.de{CURRENT_PATCH}/"
           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
-          # Скачивание всех 19 чит-компонентов из твоей второй части
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/Tundra.wotmod" "${CHEAT_CDN}Tundra.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoAA.wotmod" "${CHEAT_CDN}WoAA.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoRP.wotmod" "${CHEAT_CDN}WoRP.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoRX.wotmod" "${CHEAT_CDN}WoRX.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoAD.wotmod" "${CHEAT_CDN}WoAD.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoH.wotmod" "${CHEAT_CDN}WoH.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoLP.wotmod" "${CHEAT_CDN}WoLP.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoRM.wotmod" "${CHEAT_CDN}WoRM.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoTD.wotmod" "${CHEAT_CDN}WoTD.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoDO.wotmod" "${CHEAT_CDN}WoDO.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoMT.wotmod" "${CHEAT_CDN}WoMT.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoAR.wotmod" "${CHEAT_CDN}WoAR.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoDS.wotmod" "${CHEAT_CDN}WoDS.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoGS.wotmod" "${CHEAT_CDN}WoGS.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/mod_aim_drw.wotmod" "${CHEAT_CDN}mod_aim_drw.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/mod_xray_drw.wotmod" "${CHEAT_CDN}mod_xray_drw.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoSS.wotmod" "${CHEAT_CDN}WoSS.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoDOT.wotmod" "${CHEAT_CDN}WoDOT.wotmod" || true
-          curl -L -s -A "$UA" -o "${{ env.TARGET_PATH }}/WoRT.wotmod" "${CHEAT_CDN}WoRT.wotmod" || true
-          
-          echo "=== Все чит-компоненты и озвучки успешно обработаны роботом! ==="
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/Tundra.wotmod" "${CHEAT_CDN}Tundra.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoAA.wotmod" "${CHEAT_CDN}WoAA.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoRP.wotmod" "${CHEAT_CDN}WoRP.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoRX.wotmod" "${CHEAT_CDN}WoRX.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoAD.wotmod" "${CHEAT_CDN}WoAD.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoH.wotmod" "${CHEAT_CDN}WoH.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoLP.wotmod" "${CHEAT_CDN}WoLP.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoRM.wotmod" "${CHEAT_CDN}WoRM.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoTD.wotmod" "${CHEAT_CDN}WoTD.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoDO.wotmod" "${CHEAT_CDN}WoDO.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoMT.wotmod" "${CHEAT_CDN}WoMT.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoAR.wotmod" "${CHEAT_CDN}WoAR.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoDS.wotmod" "${CHEAT_CDN}WoDS.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoGS.wotmod" "${CHEAT_CDN}WoGS.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/mod_aim_drw.wotmod" "${CHEAT_CDN}mod_aim_drw.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/mod_xray_drw.wotmod" "${CHEAT_CDN}mod_xray_drw.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoSS.wotmod" "${CHEAT_CDN}WoSS.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoDOT.wotmod" "${CHEAT_CDN}WoDOT.wotmod" || true
+          curl -L -s -A "$UA" -o "${TARGET_PATH}/WoRT.wotmod" "${CHEAT_CDN}WoRT.wotmod" || true
 
       - name: Push Updates to serg780812-dot/speakwot-repo
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "Smart SpeakWot Robot"
-          
-          # Сохраняем всю структуру папки downloads в твой репозиторий
           git add downloads/
-          
           if git diff --cached --quiet; then
-            echo "Изменений в модов не обнаружено. База данных репозитория стабильна."
+            echo "Изменений нет."
           else
-            echo "Обновление модов завершено! Заливаем файлы в репозиторий..."
-            git commit -m "Робот: Полное скачивание и обновление всех модов под патч ${{ env.CURRENT_PATCH }}"
+            git commit -m "Робот: Авто-обновление под патч ${CURRENT_PATCH}"
             git push
           fi
