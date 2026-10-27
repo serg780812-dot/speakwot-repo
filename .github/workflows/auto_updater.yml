@@ -1,0 +1,120 @@
+name: SpeakWot Smart Artificial Auto-Updater Robot
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  smart-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Master Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Google Chrome and Selenium Driver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable unzip
+          pip install selenium webdriver-manager
+
+      - name: Check Compatibility and Clean Up Old Patches
+        run: |
+          TARGET_DIR="./downloads/mods/2.4.1.1"
+          if [ -d "./downloads" ]; then
+            rm -rf ./downloads
+          fi
+          mkdir -p "$TARGET_DIR"
+          echo "TARGET_PATH=$TARGET_DIR" >> $GITHUB_ENV
+
+      - name: Run Selenium Headless Browser Engine
+        run: |
+          python - <<EOF
+          import os
+          import time
+          import glob
+          import shutil
+          from selenium import webdriver
+          from selenium.webdriver.chrome.service import Service
+          from webdriver_manager.chrome import ChromeDriverManager
+
+          options = webdriver.ChromeOptions()
+          options.add_argument("--headless=new")
+          options.add_argument("--no-sandbox")
+          options.add_argument("--disable-dev-shm-usage")
+          options.add_argument("--disable-extensions")
+          options.add_argument("--safebrowsing-disable-download-protection")
+          options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+          
+          download_dir = os.path.abspath("./chrome_downloads")
+          os.makedirs(download_dir, exist_ok=True)
+          
+          prefs = {
+              "download.default_directory": download_dir,
+              "download.prompt_for_download": False,
+              "download.directory_upgrade": True,
+              "safebrowsing.enabled": False
+          }
+          options.add_experimental_option("prefs", prefs)
+
+          driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+          links = [
+              "https://wotspeak.org",
+              "https://wotspeak.org",
+              "https://wotspeak.org",
+              "https://wotspeak.org",
+              "https://wotspeak.org"
+          ]
+
+          target_path = os.environ['TARGET_PATH']
+
+          for idx, url in enumerate(links, 1):
+              print(f"Браузер открывает ссылку мода №{idx}...")
+              driver.get(url)
+              print("Ожидание прохождения таймера защиты сайта (15 сек)...")
+              time.sleep(15)
+
+          time.sleep(10)
+          driver.quit()
+
+          downloaded_files = glob.glob(os.path.join(download_dir, "*"))
+          print(f"Всего файлов успешно выкачано через Chrome: {len(downloaded_files)}")
+
+          for f in downloaded_files:
+              shutil.move(f, "./")
+          EOF
+
+      - name: Extract Extracted Archives with 7-Zip
+        run: |
+          echo "=== Распаковка скачанных браузером архивов ==="
+          mkdir -p ./temp_out
+          
+          for archive in *.zip *.rar; do
+            if [ -f "$archive" ]; then
+              echo "Распаковка файла: $archive"
+              7z x "$archive" -o./temp_out -y || true
+            fi
+          done
+
+          find ./temp_out -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
+          rm -rf ./temp_out ./chrome_downloads *.zip *.rar
+          echo "Все чистые .wotmod файлы успешно отсортированы!"
+
+      - name: Push Updates to serg780812-dot/speakwot-repo
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Smart SpeakWot Robot"
+          git add downloads/
+          if git diff --cached --quiet; then
+            echo "Изменений в модах не обнаружено."
+          else
+            echo "Обновление завершено! Настоящие моды отправляются в репозиторий..."
+            git commit -m "Робот: Успешный обход таймера Wotspeak через Headless Chrome"
+            git push
+          fi
