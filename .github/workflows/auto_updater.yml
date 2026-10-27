@@ -145,7 +145,3 @@ jobs:
             git commit -m "Робот: Автоматическое скачивание и обновление всех модов под патч ${{ env.CURRENT_PATCH }}"
             git push
           fi
-          curl -L -s -o WoTD.wotmod "${WOTSPEAK_BASE_URL}WoTD.wotmod"
-          curl -L -s -o WoDO.wotmod "${WOTSPEAK_BASE_URL}WoDO.wotmod"
-          curl -L -s -o WoMT.wotmod "${WOTSPEAK_BASE_URL}WoMT.wotmod"
-          curl -L -s -o WoAR.wotmod "${WOTSPEAK_BASE_URL}WoAR.wotmod"
