@@ -81,7 +81,7 @@ jobs:
         run: |
           echo "=== Скачивание базовых системных модов под патч: ${CURRENT_PATCH} ==="
           CHAMPI_URL="https://champi.de{CURRENT_PATCH}/"
-          PROTANKI_URL="https://protanki.tv{|CURRENT_PATCH}/"
+          PROTANKI_URL="https://protanki.tv{CURRENT_PATCH}/"
           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
           curl -L -s -A "$UA" -o "${TARGET_PATH}/OpenModsCore.wotmod" "${CHAMPI_URL}OpenModsCore.wotmod" || true
