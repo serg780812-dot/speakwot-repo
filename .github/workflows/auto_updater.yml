@@ -30,12 +30,13 @@ jobs:
           echo "=== Проверка совместимости и тотальная очистка старых папок ==="
           TARGET_DIR="./downloads/mods/${CURRENT_PATCH}"
           if [ -d "./downloads" ]; then
+            echo "Удаление старых версий модов для предотвращения раздувания репозитория..."
             rm -rf ./downloads
           fi
           mkdir -p "$TARGET_DIR"
           echo "TARGET_PATH=$TARGET_DIR" >> $GITHUB_ENV
 
-      - name: Execute Download Part 1 (Categories 1-3)
+      - name: Execute Download Step 1 (System Core & ProTanki)
         run: |
           echo "=== Запуск скачивания ЧАСТЬ 1 ==="
           WOTSPEAK_URL="https://champi.de{CURRENT_PATCH}/"
@@ -73,7 +74,7 @@ jobs:
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/ws.modsFW_2.2.1.wotmod" "${WOTSPEAK_URL}ws.modsFW_2.2.1.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/armor.soundOverrider_1.0.5.wotmod" "${WOTSPEAK_URL}armor.soundOverrider_1.0.5.wotmod" || true
 
-          # КАТЕГОРИЯ 3: PROTANKI КОМПОНЕНТЫ
+          # КАТЕГОРИЯ 3: ЯДРО, МОДЫ И КОНФИГИ ОТ PROTANKI
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tv.protanki.stuff_8.1.07.wotmod" "${PROTANKI_URL}tv.protanki.stuff_8.1.07.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tv.protanki.reductioninfo_8.0.04.wotmod" "${PROTANKI_URL}tv.protanki.reductioninfo_8.0.04.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tv.protanki.gunmarkscalc_8.0.04.wotmod" "${PROTANKI_URL}tv.protanki.gunmarkscalc_8.0.04.wotmod" || true
@@ -83,12 +84,10 @@ jobs:
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/phantasm.info_panel.wotmod" "${PROTANKI_URL}phantasm.info_panel.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tweakerSkyStarry.wotmod" "${PROTANKI_URL}tweakerSkyStarry.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tweakerSkyFog_WoT.wotmod" "${PROTANKI_URL}tweakerSkyFog_WoT.wotmod" || true
-             - name: Execute Download Part 2 (Category 4 Andre_V)
-        run: |
-          echo "=== Запуск скачивания ЧАСТЬ 2 (Озвучки) ==="
+             # --------------------------------------------------------------------------------
+          # КАТЕГОРИЯ 4: ПОЛНЫЙ НЕУРЕЗАННЫЙ СПИСОК ОЗВУЧЕК ЭКИПАЖА И АУДИО-КОНФИГОВ (andre_V)
+          # --------------------------------------------------------------------------------
           WOTSPEAK_AUDIO="https://champi.de{CURRENT_PATCH}/"
-          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Grom_Orudiy.wotmod" "${WOTSPEAK_AUDIO}andre_V_Grom_Orudiy.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_WG_Lesta.wotmod" "${WOTSPEAK_AUDIO}andre_V_WG_Lesta.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Stalker.wotmod" "${WOTSPEAK_AUDIO}andre_V_Stalker.wotmod" || true
@@ -118,13 +117,10 @@ jobs:
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/enemy_fire.wotmod" "${WOTSPEAK_AUDIO}enemy_fire.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/blowupSound.wotmod" "${WOTSPEAK_AUDIO}blowupSound.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_UT_announcer.wotmod" "${WOTSPEAK_AUDIO}andre_V_UT_announcer.wotmod" || true
-              - name: Execute Download Part 2 (Category 5 Chits)
-        run: |
-          echo "=== Запуск скачивания ЧАСТЬ 2 ==="
-          WOTSPEAK_CHEATS="https://champi.de{CURRENT_PATCH}/"
-          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-
-          # КАТЕГОРИЯ 5: ЧИТЫ И ЗАПРЕЩЕННЫЕ МОДЫ (НЕУРЕЗАННЫЙ СПИСОК)
+           # --------------------------------------------------------------------------------
+          # КАТЕГОРИЯ 5: ПОЛНЫЙ НЕУРЕЗАННЫЙ СПИСОК ЧИТОВ И ЗАПРЕЩЕННЫХ МОДОВ (WotSpeak Core)
+          # --------------------------------------------------------------------------------
+            WOTSPEAK_CHEATS="https://champi.de{CURRENT_PATCH}/"
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/Tundra.wotmod" "${WOTSPEAK_CHEATS}Tundra.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoAA.wotmod" "${WOTSPEAK_CHEATS}WoAA.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoRP.wotmod" "${WOTSPEAK_CHEATS}WoRP.wotmod" || true
@@ -144,7 +140,7 @@ jobs:
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoSS.wotmod" "${WOTSPEAK_CHEATS}WoSS.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoDOT.wotmod" "${WOTSPEAK_CHEATS}WoDOT.wotmod" || true
           curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoRT.wotmod" "${WOTSPEAK_CHEATS}WoRT.wotmod" || true
-          echo "=== Скачивание чит-компонентов завершено! ==="
+          echo "=== Все файлы сборки успешно скачаны роботом! ==="
 
       - name: Push Updates to serg780812-dot/speakwot-repo
         run: |
@@ -152,9 +148,8 @@ jobs:
           git config --local user.name "Smart SpeakWot Robot"
           git add downloads/
           if git diff --cached --quiet; then
-            echo "Изменений в модах не обнаружено. База данных репозитория стабильна."
+            echo "Изменений в модах не обнаружено."
           else
-            echo "Обновление модов завершено! Заливаем файлы..."
-            git commit -m "Робот: Полное скачивание и обновление всех модов под патч ${CURRENT_PATCH}"
+            git commit -m "Робот: Авто-обновление под патч ${CURRENT_PATCH}"
             git push
           fi
