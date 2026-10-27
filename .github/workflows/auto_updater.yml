@@ -1,4 +1,36 @@
-       - name: Execute Verified Download Engine
+# ====================================================================================
+# SPEAKWOT SMART AUTONOMOUS AUTO-UPDATER MASTER WORKFLOW (WG / EU VERSION - MAX BUILD)
+# Test Build: Verification of Five Real CDN Mods with Anti-Block Headers
+# ====================================================================================
+
+name: SpeakWot Smart Artificial Auto-Updater Robot
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  smart-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Master Repository
+        uses: actions/checkout@v4
+
+      - name: Set Patch Version
+        run: |
+          echo "CURRENT_PATCH=2.4.1.1" >> $GITHUB_ENV
+
+      - name: Check Compatibility and Clean Up Old Patches
+        run: |
+          TARGET_DIR="./downloads/mods/${CURRENT_PATCH}"
+          if [ -d "./downloads" ]; then
+            rm -rf ./downloads
+          fi
+          mkdir -p "$TARGET_DIR"
+          echo "TARGET_PATH=$TARGET_DIR" >> $GITHUB_ENV
+
+      - name: Execute Verified Download Engine
         run: |
           echo "=== Запуск скачивания проверенных модов ==="
           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
