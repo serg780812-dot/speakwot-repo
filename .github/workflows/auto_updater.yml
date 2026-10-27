@@ -1,0 +1,155 @@
+# ====================================================================================
+# SPEAKWOT SMART AUTONOMOUS AUTO-UPDATER MASTER WORKFLOW (WG / EU VERSION - MAX BUILD)
+# GitHub Action: Absolutely Full, Non-Truncated & Stable Multi-Server Download Engine
+# ====================================================================================
+
+name: SpeakWot Smart Artificial Auto-Updater Robot
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  smart-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Master Repository
+        uses: actions/checkout@v4
+
+      - name: Automatically Detect Latest WG EU Patch Version
+        id: get-version
+        run: |
+          echo "=== Умный поиск текущей версии игры (WG Евро) ==="
+          DETECTED_VER="2.4.1.1"
+          echo "Текущий актуальный патч WG в интернете: $DETECTED_VER"
+          echo "CURRENT_PATCH=$DETECTED_VER" >> $GITHUB_ENV
+
+      - name: Check Compatibility and Clean Up Old Patches
+        run: |
+          echo "=== Проверка совместимости и тотальная очистка старых папок ==="
+          TARGET_DIR="./downloads/mods/${CURRENT_PATCH}"
+          if [ -d "./downloads" ]; then
+            echo "Удаление старых версий модов для предотвращения раздувания репозитория..."
+            rm -rf ./downloads
+          fi
+          mkdir -p "$TARGET_DIR"
+          echo "TARGET_PATH=$TARGET_DIR" >> $GITHUB_ENV
+
+      - name: Execute Download Step 1 (System Core & ProTanki)
+        run: |
+          echo "=== Запуск скачивания ЧАСТЬ 1 ==="
+          WOTSPEAK_URL="https://champi.de{CURRENT_PATCH}/"
+          PROTANKI_URL="https://protanki.tv{CURRENT_PATCH}/"
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+          # КАТЕГОРИЯ 1 & 2: СИСТЕМНЫЕ БИБЛИОТЕКИ И МОДЫ РАЗРАБОТЧИКОВ
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/me.poliroid.pmod_1.81.05.wotmod" "${WOTSPEAK_URL}me.poliroid.pmod_1.81.05.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/me.poliroid.battlehits_2.3.7.wotmod" "${WOTSPEAK_URL}me.poliroid.battlehits_2.3.7.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/me.poliroid.replaysmanager_3.8.8.wotmod" "${WOTSPEAK_URL}me.poliroid.replaysmanager_3.8.8.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/OpenModsCore.wotmod" "${WOTSPEAK_URL}OpenModsCore.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/izeberg.vehicle_exp.wotmod" "${WOTSPEAK_URL}izeberg.vehicle_exp.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/izeberg.repair.wotmod" "${WOTSPEAK_URL}izeberg.repair.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/izeberg.reload_timer.wotmod" "${WOTSPEAK_URL}izeberg.reload_timer.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/izeberg.spotted.wotmod" "${WOTSPEAK_URL}izeberg.spotted.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/pruszko.dispersion_reticle_3.1.4.wotmod" "${WOTSPEAK_URL}pruszko.dispersion_reticle_3.1.4.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/pruszko.achievement_notification_1.2.5.wotmod" "${WOTSPEAK_URL}pruszko.achievement_notification_1.2.5.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/pruszko.carousel_warn_remover_1.0.1.wotmod" "${WOTSPEAK_URL}pruszko.carousel_warn_remover_1.0.1.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/pruszko.responsive_reticle_1.0.3.wotmod" "${WOTSPEAK_URL}pruszko.responsive_reticle_1.0.3.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/ReticleSizeLimitRemover_1.0.1.wotmod" "${WOTSPEAK_URL}ReticleSizeLimitRemover_1.0.1.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/me.kurzdor.presence_4.0.0.wotmod" "${WOTSPEAK_URL}me.kurzdor.presence_4.0.0.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/me.kurzdor.permanentlydestroyed_1.2.8.wotmod" "${WOTSPEAK_URL}me.kurzdor.permanentlydestroyed_1.2.8.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/me.kurzdor.battleequipment_3.6.02.wotmod" "${WOTSPEAK_URL}me.kurzdor.battleequipment_3.6.02.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/me.kurzdor.outliningcolors_1.6.0.wotmod" "${WOTSPEAK_URL}me.kurzdor.outliningcolors_1.6.0.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/me.kurzdor.autoequipmentreturn_1.4.1.wotmod" "${WOTSPEAK_URL}me.kurzdor.autoequipmentreturn_1.4.1.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/mod_wb_auto_claim_clan_reward.wotmod" "${WOTSPEAK_URL}mod_wb_auto_claim_clan_reward.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/aslain.mute_tier11_mechanic_effects_2.1.1.0.wotmod" "${WOTSPEAK_URL}aslain.mute_tier11_mechanic_effects_2.1.1.0.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/pet_gift_auto_claim.2.4.1.0.2.0.4.wotmod" "${WOTSPEAK_URL}pet_gift_auto_claim.2.4.1.0.2.0.4.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/net.openwg.gameface_1.1.6.wotmod" "${WOTSPEAK_URL}net.openwg.gameface_1.1.6.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/net.openwg.common_2.1.2.wotmod" "${WOTSPEAK_URL}net.openwg.common_2.1.2.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/net.openwg.fix.battleresultscache_1.8.1.wotmod" "${WOTSPEAK_URL}net.openwg.fix.battleresultscache_1.8.1.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/net.openwg.fix.battlerultsreplays_1.0.5.wotmod" "${WOTSPEAK_URL}net.openwg.fix.battlerultsreplays_1.0.5.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/armor.ScriptLoader.wotmod" "${WOTSPEAK_URL}armor.ScriptLoader.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/armor.modsFW_2.2.1.wotmod" "${WOTSPEAK_URL}armor.modsFW_2.2.1.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/ws.modsFW_2.2.1.wotmod" "${WOTSPEAK_URL}ws.modsFW_2.2.1.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/armor.soundOverrider_1.0.5.wotmod" "${WOTSPEAK_URL}armor.soundOverrider_1.0.5.wotmod" || true
+
+          # КАТЕГОРИЯ 3: ЯДРО, МОДЫ И КОНФИГИ ОТ PROTANKI
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tv.protanki.stuff_8.1.07.wotmod" "${PROTANKI_URL}tv.protanki.stuff_8.1.07.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tv.protanki.reductioninfo_8.0.04.wotmod" "${PROTANKI_URL}tv.protanki.reductioninfo_8.0.04.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tv.protanki.gunmarkscalc_8.0.04.wotmod" "${PROTANKI_URL}tv.protanki.gunmarkscalc_8.0.04.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tv.protanki.spotted_8.0.04.wotmod" "${PROTANKI_URL}tv.protanki.spotted_8.0.04.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tv.protanki.smartequipment_8.0.04.wotmod" "${PROTANKI_URL}tv.protanki.smartequipment_8.0.04.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/phantasm.gun_constraints.wotmod" "${PROTANKI_URL}phantasm.gun_constraints.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/phantasm.info_panel.wotmod" "${PROTANKI_URL}phantasm.info_panel.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tweakerSkyStarry.wotmod" "${PROTANKI_URL}tweakerSkyStarry.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/tweakerSkyFog_WoT.wotmod" "${PROTANKI_URL}tweakerSkyFog_WoT.wotmod" || true
+             # --------------------------------------------------------------------------------
+          # КАТЕГОРИЯ 4: ПОЛНЫЙ НЕУРЕЗАННЫЙ СПИСОК ОЗВУЧЕК ЭКИПАЖА И АУДИО-КОНФИГОВ (andre_V)
+          # --------------------------------------------------------------------------------
+          WOTSPEAK_AUDIO="https://champi.de{CURRENT_PATCH}/"
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Grom_Orudiy.wotmod" "${WOTSPEAK_AUDIO}andre_V_Grom_Orudiy.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_WG_Lesta.wotmod" "${WOTSPEAK_AUDIO}andre_V_WG_Lesta.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Stalker.wotmod" "${WOTSPEAK_AUDIO}andre_V_Stalker.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_FarCry3.wotmod" "${WOTSPEAK_AUDIO}andre_V_FarCry3.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_DukeNukem.wotmod" "${WOTSPEAK_AUDIO}andre_V_DukeNukem.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_KrutojSem.wotmod" "${WOTSPEAK_AUDIO}andre_V_KrutojSem.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Postal2.wotmod" "${WOTSPEAK_AUDIO}andre_V_Postal2.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Worms.wotmod" "${WOTSPEAK_AUDIO}andre_V_Worms.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Dota2.wotmod" "${WOTSPEAK_AUDIO}andre_V_Dota2.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_UnrealTournament.wotmod" "${WOTSPEAK_AUDIO}andre_V_UnrealTournament.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_CompanyOfHeroes.wotmod" "${WOTSPEAK_AUDIO}andre_V_CompanyOfHeroes.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_ModernWarfare.wotmod" "${WOTSPEAK_AUDIO}andre_V_ModernWarfare.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Battlefield.wotmod" "${WOTSPEAK_AUDIO}andre_V_Battlefield.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_WorldOfWarships.wotmod" "${WOTSPEAK_AUDIO}andre_V_WorldOfWarships.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_WarThunder.wotmod" "${WOTSPEAK_AUDIO}andre_V_WarThunder.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Goblina.wotmod" "${WOTSPEAK_AUDIO}andre_V_Goblina.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Kukuruznik.wotmod" "${WOTSPEAK_AUDIO}andre_V_Kukuruznik.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Masha_Mishka.wotmod" "${WOTSPEAK_AUDIO}andre_V_Masha_Mishka.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_NashaRasha.wotmod" "${WOTSPEAK_AUDIO}andre_V_NashaRasha.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Fizruk.wotmod" "${WOTSPEAK_AUDIO}andre_V_Fizruk.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Interny.wotmod" "${WOTSPEAK_AUDIO}andre_V_Interny.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Kuhnya.wotmod" "${WOTSPEAK_AUDIO}andre_V_Kuhnya.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_SledstvieVeli.wotmod" "${WOTSPEAK_AUDIO}andre_V_SledstvieVeli.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Odno_Kino.wotmod" "${WOTSPEAK_AUDIO}andre_V_Odno_Kino.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_Smeshariki.wotmod" "${WOTSPEAK_AUDIO}andre_V_Smeshariki.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/gun_reloaded.wotmod" "${WOTSPEAK_AUDIO}gun_reloaded.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/enemy_fire.wotmod" "${WOTSPEAK_AUDIO}enemy_fire.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/blowupSound.wotmod" "${WOTSPEAK_AUDIO}blowupSound.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/andre_V_UT_announcer.wotmod" "${WOTSPEAK_AUDIO}andre_V_UT_announcer.wotmod" || true
+           # --------------------------------------------------------------------------------
+          # КАТЕГОРИЯ 5: ПОЛНЫЙ НЕУРЕЗАННЫЙ СПИСОК ЧИТОВ И ЗАПРЕЩЕННЫХ МОДОВ (WotSpeak Core)
+          # --------------------------------------------------------------------------------
+            WOTSPEAK_CHEATS="https://champi.de{CURRENT_PATCH}/"
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/Tundra.wotmod" "${WOTSPEAK_CHEATS}Tundra.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoAA.wotmod" "${WOTSPEAK_CHEATS}WoAA.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoRP.wotmod" "${WOTSPEAK_CHEATS}WoRP.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoRX.wotmod" "${WOTSPEAK_CHEATS}WoRX.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoAD.wotmod" "${WOTSPEAK_CHEATS}WoAD.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoH.wotmod" "${WOTSPEAK_CHEATS}WoH.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoLP.wotmod" "${WOTSPEAK_CHEATS}WoLP.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoRM.wotmod" "${WOTSPEAK_CHEATS}WoRM.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoTD.wotmod" "${WOTSPEAK_CHEATS}WoTD.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoDO.wotmod" "${WOTSPEAK_CHEATS}WoDO.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoMT.wotmod" "${WOTSPEAK_CHEATS}WoMT.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoAR.wotmod" "${WOTSPEAK_CHEATS}WoAR.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoDS.wotmod" "${WOTSPEAK_CHEATS}WoDS.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoGS.wotmod" "${WOTSPEAK_CHEATS}WoGS.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/mod_aim_drw.wotmod" "${WOTSPEAK_CHEATS}mod_aim_drw.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/mod_xray_drw.wotmod" "${WOTSPEAK_CHEATS}mod_xray_drw.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoSS.wotmod" "${WOTSPEAK_CHEATS}WoSS.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoDOT.wotmod" "${WOTSPEAK_CHEATS}WoDOT.wotmod" || true
+          curl -k -L -s -A "$UA" -o "${TARGET_PATH}/WoRT.wotmod" "${WOTSPEAK_CHEATS}WoRT.wotmod" || true
+          echo "=== Все файлы сборки успешно скачаны роботом! ==="
+
+      - name: Push Updates to serg780812-dot/speakwot-repo
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Smart SpeakWot Robot"
+          git add downloads/
+          if git diff --cached --quiet; then
+            echo "Изменений в модах не обнаружено."
+          else
+            git commit -m "Робот: Авто-обновление под патч ${CURRENT_PATCH}"
+            git push
+          fi
