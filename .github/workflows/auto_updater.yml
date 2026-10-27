@@ -1,0 +1,98 @@
+# ====================================================================================
+# SPEAKWOT SMART AUTONOMOUS AUTO-UPDATER MASTER WORKFLOW (WG / EU VERSION - MAX BUILD)
+# Test Build: Verification of Five Real CDN Mods (Shaytan, EdgeDetect, TargetDirection, Lhit, Reloading)
+# ====================================================================================
+
+name: SpeakWot Smart Artificial Auto-Updater Robot
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  smart-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Master Repository
+        uses: actions/checkout@v4
+
+      - name: Set Patch Version
+        run: |
+          echo "CURRENT_PATCH=2.4.1.1" >> $GITHUB_ENV
+
+      - name: Check Compatibility and Clean Up Old Patches
+        run: |
+          TARGET_DIR="./downloads/mods/${CURRENT_PATCH}"
+          if [ -d "./downloads" ]; then
+            rm -rf ./downloads
+          fi
+          mkdir -p "$TARGET_DIR"
+          echo "TARGET_PATH=$TARGET_DIR" >> $GITHUB_ENV
+
+      - name: Execute Verified Download Engine
+        run: |
+          echo "=== Запуск скачивания проверенных модов ==="
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+          # МОД 1: Аимбот Шайтан (.rar)
+          curl -k -L -A "$UA" -e "https://wotspeak.org/" --connect-timeout 30 --retry 3 -o "shaytan.rar" "https://wotspeak.org"
+          if [ -f "shaytan.rar" ]; then
+            mkdir -p ./temp_shaytan
+            7z x  shaytan.rar -o./temp_shaytan -y
+            find ./temp_shaytan -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
+            rm -rf ./temp_shaytan rm -f shaytan.rar
+            echo "Аимбот Шайтан успешно добавлен!"
+          fi
+
+          # МОД 2: Рентген / Контуры танков (.zip)
+          curl -k -L -A "$UA" -e "https://wotspeak.org/" --connect-timeout 30 --retry 3 -o "edge_detect.zip" "https://wotspeak.org"
+          if [ -f "edge_detect.zip" ]; then
+            mkdir -p ./temp_edge
+            unzip -q edge_detect.zip -d ./temp_edge || 7z x edge_detect.zip -o./temp_edge -y
+            find ./temp_edge -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
+            rm -rf ./temp_edge rm -f edge_detect.zip
+            echo "Мод Рентген успешно добавлен!"
+          fi
+
+          # МОД 3: Направление доступной цели (.rar)
+          curl -k -L -A "$UA" -e "https://wotspeak.org/" --connect-timeout 30 --retry 3 -o "target_dir.rar" "https://wotspeak.org"
+          if [ -f "target_dir.rar" ]; then
+            mkdir -p ./temp_target
+            7z x  target_dir.rar -o./temp_target -y
+            find ./temp_target -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
+            rm -rf ./temp_target rm -f target_dir.rar
+            echo "Мод Направление цели успешно добавлен!"
+          fi
+
+          # МОД 4: Индикатор попаданий Lhit (.rar)
+          curl -k -L -A "$UA" -e "https://wotspeak.org/" --connect-timeout 30 --retry 3 -o "hit_marker.rar" "https://wotspeak.org"
+          if [ -f "hit_marker.rar" ]; then
+            mkdir -p ./temp_hit
+            7z x  hit_marker.rar -o./temp_hit -y
+            find ./temp_hit -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
+            rm -rf ./temp_hit rm -f hit_marker.rar
+            echo "Мод Lhit Индикатор попаданий успешно добавлен!"
+          fi
+
+          # МОД 5: Индикатор перезарядки над танком (.zip)
+          curl -k -L -A "$UA" -e "https://wotspeak.org/" --connect-timeout 30 --retry 3 -o "reloading.zip" "https://wotspeak.org"
+          if [ -f "reloading.zip" ]; then
+            mkdir -p ./temp_reloading
+            unzip -q reloading.zip -d ./temp_reloading || 7z x reloading.zip -o./temp_reloading -y
+            find ./temp_reloading -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
+            rm -rf ./temp_reloading rm -f reloading.zip
+            echo "Мод Индикатор перезарядки успешно добавлен!"
+          fi
+
+      - name: Push Updates to serg780812-dot/speakwot-repo
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Smart SpeakWot Robot"
+          git add downloads/
+          if git diff --cached --quiet; then
+            echo "Изменений нет."
+          else
+            git commit -m "Робот: Тестовое обновление пяти проверенных модов под патч ${CURRENT_PATCH}"
+            git push
+          fi
