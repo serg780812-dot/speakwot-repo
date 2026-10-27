@@ -1,0 +1,114 @@
+# ====================================================================================
+# SPEAKWOT SMART AUTONOMOUS AUTO-UPDATER MASTER WORKFLOW (WG / EU VERSION - MAX BUILD)
+# Test Build: Verification of Five Real CDN Mods with Anti-Block Headers
+# ====================================================================================
+
+name: SpeakWot Smart Artificial Auto-Updater Robot
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  smart-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Master Repository
+        uses: actions/checkout@v4
+
+      - name: Set Patch Version
+        run: |
+          echo "CURRENT_PATCH=2.4.1.1" >> $GITHUB_ENV
+
+      - name: Check Compatibility and Clean Up Old Patches
+        run: |
+          TARGET_DIR="./downloads/mods/${CURRENT_PATCH}"
+          if [ -d "./downloads" ]; then
+            rm -rf ./downloads
+          fi
+          mkdir -p "$TARGET_DIR"
+          echo "TARGET_PATH=$TARGET_DIR" >> $GITHUB_ENV
+
+      - name: Execute Verified Download Engine
+        run: |
+          echo "=== Запуск скачивания проверенных модов ==="
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+          REF="https://wotspeak.org"
+
+          # МОД 1: Аимбот Шайтан (.rar)
+          curl -k -L -A "$UA" -e "$REF" --connect-timeout 30 --retry 3 -o "shaytan.rar" "https://wotspeak.org"
+          if [ -f "shaytan.rar" ] && [ $(stat -c%s "shaytan.rar") -gt 150000 ]; then
+            mkdir -p ./temp_shaytan
+            7z x shaytan.rar -o./temp_shaytan -y || true
+            find ./temp_shaytan -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
+            rm -rf ./temp_shaytan
+            echo "Аимбот Шайтан успешно добавлен!"
+          else
+            echo "Предупреждение: Файл Шайтана заблокирован сервером или не скачан."
+          fi
+          rm -f shaytan.rar
+
+          # МОД 2: Рентген / Контуры танков (.zip)
+          curl -k -L -A "$UA" -e "$REF" --connect-timeout 30 --retry 3 -o "edge_detect.zip" "https://wotspeak.org"
+          if [ -f "edge_detect.zip" ] && [ $(stat -c%s "edge_detect.zip") -gt 50000 ]; then
+            mkdir -p ./temp_edge
+            unzip -q edge_detect.zip -d ./temp_edge || 7z x edge_detect.zip -o./temp_edge -y || true
+            find ./temp_edge -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
+            rm -rf ./temp_edge
+            echo "Мод Рентген успешно добавлен!"
+          else
+            echo "Предупреждение: Мод Рентген заблокирован сервером."
+          fi
+          rm -f edge_detect.zip
+
+          # МОД 3: Направление доступной цели (.rar)
+          curl -k -L -A "$UA" -e "$REF" --connect-timeout 30 --retry 3 -o "target_dir.rar" "https://wotspeak.org"
+          if [ -f "target_dir.rar" ] && [ $(stat -c%s "target_dir.rar") -gt 50000 ]; then
+            mkdir -p ./temp_target
+            7z x target_dir.rar -o./temp_target -y || true
+            find ./temp_target -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
+            rm -rf ./temp_target
+            echo "Мод Направление цели успешно добавлен!"
+          else
+            echo "Предупреждение: Направление цели заблокировано сервером."
+          fi
+          rm -f target_dir.rar
+
+          # МОД 4: Индикатор попаданий Lhit (.rar)
+          curl -k -L -A "$UA" -e "$REF" --connect-timeout 30 --retry 3 -o "hit_marker.rar" "https://wotspeak.org"
+          if [ -f "hit_marker.rar" ] && [ $(stat -c%s "hit_marker.rar") -gt 50000 ]; then
+            mkdir -p ./temp_hit
+            7z x hit_marker.rar -o./temp_hit -y || true
+            find ./temp_hit -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
+            rm -rf ./temp_hit
+            echo "Мод Lhit Индикатор попаданий успешно добавлен!"
+          else
+            echo "Предупреждение: Мод Lhit заблокирован сервером."
+          fi
+          rm -f hit_marker.rar
+
+          # МОД 5: Индикатор перезарядки над танком (.zip)
+          curl -k -L -A "$UA" -e "$REF" --connect-timeout 30 --retry 3 -o "reloading.zip" "https://wotspeak.org"
+          if [ -f "reloading.zip" ] && [ $(stat -c%s "reloading.zip") -gt 50000 ]; then
+            mkdir -p ./temp_reloading
+            unzip -q reloading.zip -d ./temp_reloading || 7z x reloading.zip -o./temp_reloading -y || true
+            find ./temp_reloading -name "*.wotmod" -exec cp {} "${TARGET_PATH}/" \;
+            rm -rf ./temp_reloading
+            echo "Мод Индикатор перезарядки успешно добавлен!"
+          else
+            echo "Предупреждение: Индикатор перезарядки заблокирован сервером."
+          fi
+          rm -f reloading.zip
+
+      - name: Push Updates to serg780812-dot/speakwot-repo
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Smart SpeakWot Robot"
+          git add downloads/
+          if git diff --cached --quiet; then
+            echo "Изменений нет."
+          else
+            git commit -m "Робот: Тестовое обновление проверенных модов под патч ${CURRENT_PATCH}"
+            git push
+          fi
